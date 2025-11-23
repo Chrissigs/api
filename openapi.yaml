@@ -1,0 +1,183 @@
+openapi: 3.0.0
+info:
+  title: Project Passport API
+  description: API for Trusted Introducers to push Verified Investor payloads to the WPS Register.
+  version: 1.0.0
+servers:
+  - url: http://localhost:3000
+    description: Local Development Server
+paths:
+  /v1/onboard:
+    post:
+      summary: Onboard a Verified Investor
+      description: |
+        Accepts a JSON payload containing investor identity and compliance warranty.
+        Validates the signature, schema, and KYC status.
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/OnboardRequest'
+      responses:
+        '201':
+          description: Created. Investor successfully onboarded.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  member_id:
+                    type: string
+                    description: The unique ID assigned to the new member.
+                    example: "MEM-2025-998877"
+        '400':
+          description: Bad Request. Schema validation failed.
+        '401':
+          description: Unauthorized. Invalid token or certificate.
+        '403':
+          description: Forbidden. KYC status is not VERIFIED.
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+  schemas:
+    OnboardRequest:
+      type: object
+      required:
+        - header
+        - investor_identity
+        - compliance_warranty
+      properties:
+        header:
+          $ref: '#/components/schemas/Header'
+        investor_identity:
+          $ref: '#/components/schemas/InvestorIdentity'
+        compliance_warranty:
+          $ref: '#/components/schemas/ComplianceWarranty'
+    
+    Header:
+      type: object
+      required:
+        - timestamp
+        - bank_id
+        - transaction_id
+      properties:
+        timestamp:
+          type: string
+          format: date-time
+          example: "2025-11-22T10:00:00Z"
+          x-iso-20022-mapping: "CreDtTm"
+        bank_id:
+          type: string
+          example: "CNB-KY-001"
+          x-iso-20022-mapping: "InitgPty.Id.OrgId.AnyBIC"
+        transaction_id:
+          type: string
+          example: "UUID-1234-5678"
+          x-iso-20022-mapping: "MsgId"
+
+    InvestorIdentity:
+      type: object
+      required:
+        - legal_name
+        - date_of_birth
+        - nationality
+        - tax_residency
+      properties:
+        legal_name:
+          type: string
+          example: "Johnathan Doe"
+          description: "Full legal name (convenience field, maps to Nm structure)"
+          x-iso-20022-mapping: "PrtryId.Id"
+        Nm:
+          type: object
+          description: "ISO 20022 Name structure for SEPA compliance"
+          properties:
+            FrstNm:
+              type: string
+              example: "Johnathan"
+              description: "First Name"
+            Srnm:
+              type: string
+              example: "Doe"
+              description: "Surname"
+          x-iso-20022-mapping: "Nm"
+        PstlAdr:
+          type: object
+          description: "ISO 20022 Postal Address for SEPA compliance"
+          properties:
+            StrtNm:
+              type: string
+              example: "123 Main Street"
+              description: "Street Name"
+            TwnNm:
+              type: string
+              example: "George Town"
+              description: "Town Name"
+            Ctry:
+              type: string
+              example: "KY"
+              description: "Country (ISO 3166-1 alpha-2)"
+            PstCd:
+              type: string
+              example: "KY1-1234"
+              description: "Postal Code"
+          x-iso-20022-mapping: "PstlAdr"
+        date_of_birth:
+          type: string
+          format: date
+          example: "1980-01-01"
+          x-iso-20022-mapping: "BirthDt"
+        nationality:
+          type: string
+          example: "KY"
+          x-iso-20022-mapping: "CtryOfRes"
+        tax_residency:
+          type: array
+          description: "CRS-compliant multi-jurisdiction tax residency vector"
+          items:
+            type: object
+            required:
+              - country
+              - tin
+            properties:
+              country:
+                type: string
+                pattern: "^[A-Z]{2}$"
+                example: "KY"
+                description: "Country code (ISO 3166-1 alpha-2)"
+              tin:
+                type: string
+                pattern: "^[a-f0-9]{64}$"
+                example: "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+                description: "Tax Identification Number (SHA-256 hashed for privacy)"
+          example:
+            - country: "KY"
+              tin: "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+            - country: "US"
+              tin: "a3b5c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b866"
+          x-iso-20022-mapping: "TaxRes"
+
+    ComplianceWarranty:
+      type: object
+      required:
+        - kyc_status
+        - screening_status
+        - warranty_token
+      properties:
+        kyc_status:
+          type: string
+          enum: [VERIFIED, PENDING, REJECTED]
+          example: "VERIFIED"
+        screening_status:
+          type: string
+          example: "CLEAR"
+        warranty_token:
+          type: string
+          description: SHA-256 hash or similar token.
+          example: "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
