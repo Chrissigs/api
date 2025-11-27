@@ -1,99 +1,45 @@
-openapi: 3.0.0
-info:
-  title: Project Passport API
-  description: API for Trusted Introducers to push Verified Investor payloads to the WPS Register.
-  version: 1.0.0
-servers:
-  - url: http://localhost:3000
-    description: Local Development Server
-paths:
-  /v1/onboard:
-    post:
-      summary: Onboard a Verified Investor
-      description: |
-        Accepts a JSON payload containing investor identity and compliance warranty.
-        Validates the signature, schema, and KYC status.
-      security:
-        - bearerAuth: []
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/OnboardRequest'
-      responses:
-        '201':
-          description: Created. Investor successfully onboarded.
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  member_id:
-                    type: string
-                    description: The unique ID assigned to the new member.
-                    example: "MEM-2025-998877"
-        '400':
-          description: Bad Request. Schema validation failed.
-        '401':
-          description: Unauthorized. Invalid token or certificate.
-        '403':
-          description: Forbidden. KYC status is not VERIFIED.
-components:
-  securitySchemes:
-    bearerAuth:
-      type: http
-      scheme: bearer
-      bearerFormat: JWT
-  schemas:
-    OnboardRequest:
-      type: object
-      required:
-        - header
-        - investor_identity
-        - compliance_warranty
-      properties:
-        header:
-          $ref: '#/components/schemas/Header'
-        investor_identity:
-          $ref: '#/components/schemas/InvestorIdentity'
-        compliance_warranty:
-          $ref: '#/components/schemas/ComplianceWarranty'
-    
-    Header:
-      type: object
-      required:
-        - timestamp
-        - bank_id
-        - transaction_id
-      properties:
-        timestamp:
-          type: string
-          format: date-time
-          example: "2025-11-22T10:00:00Z"
-          x-iso-20022-mapping: "CreDtTm"
-        bank_id:
-          type: string
-          example: "CNB-KY-001"
-          x-iso-20022-mapping: "InitgPty.Id.OrgId.AnyBIC"
-        transaction_id:
-          type: string
-          example: "UUID-1234-5678"
-          x-iso-20022-mapping: "MsgId"
-
-    InvestorIdentity:
-      type: object
-      required:
-        - legal_name
-        - date_of_birth
-        - nationality
-        - tax_residency
-      properties:
-        legal_name:
-          type: string
-          example: "Johnathan Doe"
-          description: "Full legal name (convenience field, maps to Nm structure)"
-          x-iso-20022-mapping: "PrtryId.Id"
+  Header:
+    type: object
+    required:
+      - timestamp
+      - bank_id
+      - transaction_id
+      - fund_id
+    properties:
+      timestamp:
+        type: string
+        format: date-time
+        example: "2025-11-22T20:00:00Z"
+      bank_id:
+        type: string
+        example: "BANK-001"
+      transaction_id:
+        type: string
+        example: "TXN-123"
+      fund_id:
+        type: string
+        example: "FUND_DEMO_01"
+        description: "Target Fund ID for routing to specific Fund Administrator"
+        zk_proof:
+          type: object
+          description: "Zero-Knowledge Proof (Groth16) verifying identity without revealing PII"
+          properties:
+            pi_a:
+              type: array
+              items: { type: string }
+            pi_b:
+              type: array
+              items: { type: array, items: { type: string } }
+            pi_c:
+              type: array
+              items: { type: string }
+            protocol:
+              type: string
+              example: "groth16"
+        public_signals:
+          type: array
+          items: { type: string }
+          description: "Public outputs of the ZK circuit (e.g. [1] for 'Valid Jurisdiction')"
         Nm:
           type: object
           description: "ISO 20022 Name structure for SEPA compliance"
@@ -153,14 +99,15 @@ components:
                 description: "Country code (ISO 3166-1 alpha-2)"
               tin:
                 type: string
-                pattern: "^[a-f0-9]{64}$"
-                example: "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
-                description: "Tax Identification Number (SHA-256 hashed for privacy)"
+                pattern: "^[A-Za-z0-9+/]+={0,2}$"
+                example: "SGVsbG8gV29ybGQgRW5jcnlwdGVk..."
+                description: "Tax Identification Number (RSA-4096-OAEP encrypted for FATCA/CRS reporting)"
+                x-encryption-algorithm: "RSA-4096-OAEP"
           example:
             - country: "KY"
-              tin: "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+              tin: "dGluLWV4YW1wbGUtZW5jcnlwdGVk"
             - country: "US"
-              tin: "a3b5c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b866"
+              tin: "dGluLXVzLWV4YW1wbGUtZW5jcnlwdGVk"
           x-iso-20022-mapping: "TaxRes"
 
     ComplianceWarranty:
@@ -181,3 +128,7 @@ components:
           type: string
           description: SHA-256 hash or similar token.
           example: "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        contract_id:
+          type: string
+          description: "Reference to the active Deed of Reliance in the Legal Registry"
+          example: "DEED-2025-001"

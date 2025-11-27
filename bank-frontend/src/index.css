@@ -1,0 +1,14 @@
+@import "tailwindcss";
+
+@theme {
+  --color-bank-blue: #003366;
+  --color-bank-gold: #C5A059;
+  --color-bank-gray: #F5F7FA;
+  --font-sans: 'Inter', sans-serif;
+}
+
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+
+body {
+  @apply bg-bank-gray text-slate-800 font-sans;
+}

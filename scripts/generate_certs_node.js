@@ -50,7 +50,7 @@ function generateCert(subject, issuer, issuerKey, serial) {
 
 console.log('Generating CA...');
 const ca = generateCert(
-    { CN: 'WPS Root CA', C: 'KY', ST: 'Grand Cayman', L: 'George Town', O: 'WPS' }
+    { CN: 'Protocol System Root CA', C: 'US', ST: 'State', L: 'City', O: 'Protocol System' }
 );
 fs.writeFileSync(path.join(certsDir, 'ca-key.pem'), ca.key);
 fs.writeFileSync(path.join(certsDir, 'ca-cert.pem'), ca.cert);
@@ -102,7 +102,7 @@ function generateEndEntityCert(subject, issuer, issuerKey, serial, isServer) {
 
 console.log('Generating Server Cert...');
 const server = generateEndEntityCert(
-    { CN: 'localhost', C: 'KY', ST: 'Grand Cayman', L: 'George Town', O: 'WPS' },
+    { CN: 'localhost', C: 'US', ST: 'State', L: 'City', O: 'Protocol System' },
     ca.certificate,
     ca.keys.privateKey,
     '02',

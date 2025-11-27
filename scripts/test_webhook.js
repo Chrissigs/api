@@ -55,7 +55,7 @@ const complianceWarranty = {
 
 // Create JWT (Warranty Token)
 const jwtPayload = {
-    iss: "Banco-Mercantil-del-Norte",
+    iss: "BANK-MX-001",
     iat: Math.floor(Date.now() / 1000),
     exp: Math.floor(Date.now() / 1000) + (60 * 60),
     investor_identity: {
@@ -71,7 +71,7 @@ const warrantyToken = jwt.sign(jwtPayload, bankPrivateKey, { algorithm: 'RS256' 
 const payload = {
     header: {
         timestamp: new Date().toISOString(),
-        bank_id: "Banco-Mercantil-del-Norte",
+        bank_id: "BANK-MX-001",
         transaction_id: `TXN-WEBHOOK-TEST-${Date.now()}`
     },
     investor_identity: investorIdentity,
@@ -81,7 +81,7 @@ const payload = {
     }
 };
 
-console.log('Test Scenario: Onboarding investor from Banco Mercantil del Norte (Mexico)');
+console.log('Test Scenario: Onboarding investor from Example Mexican Bank');
 console.log(`Investor: ${payload.investor_identity.legal_name}`);
 console.log(`Transaction ID: ${payload.header.transaction_id}\n`);
 

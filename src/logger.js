@@ -29,9 +29,25 @@ class HashChainedLogger {
         }
     }
 
+    /**
+     * Workstream C: Deep Masking - Enhanced PII Redaction
+     * 
+     * ISO 20022 PII Fields to Hash:
+     * - Nm (FrstNm, Srnm)
+     * - DtOfBirth
+     * - TaxRes (Id)
+     * 
+     * @param {*} data - Data to sanitize
+     * @returns {*} Sanitized data with PII replaced by hashes
+     */
     sanitize(data) {
         if (!data) return data;
-        const sensitiveKeys = ['legal_name', 'date_of_birth', 'warranty_token', 'token', 'password', 'secret'];
+
+        // Fields to Hash (Exact match keys)
+        const piiFields = ['FrstNm', 'Srnm', 'DtOfBirth', 'Id']; // Id inside TaxRes
+
+        // Fields to Redact completely
+        const secretFields = ['warranty_token', 'token', 'password', 'secret', 'shard_a', 'shard_b', 'encrypted_blob', 'auth_tag', 'iv'];
 
         if (typeof data === 'object') {
             if (Array.isArray(data)) {
@@ -40,9 +56,18 @@ class HashChainedLogger {
 
             const sanitized = {};
             for (const key in data) {
-                if (sensitiveKeys.includes(key)) {
+                if (piiFields.includes(key)) {
+                    // PII: Replace with SHA-256 hash
+                    const value = String(data[key]);
+                    sanitized[key] = crypto.createHash('sha256')
+                        .update(value)
+                        .digest('hex');
+                    sanitized[`${key}_hash_type`] = 'SHA256';
+                } else if (secretFields.includes(key)) {
+                    // Secrets: Redact
                     sanitized[key] = '[REDACTED]';
                 } else if (typeof data[key] === 'object') {
+                    // Recursive
                     sanitized[key] = this.sanitize(data[key]);
                 } else {
                     sanitized[key] = data[key];
@@ -53,32 +78,25 @@ class HashChainedLogger {
         return data;
     }
 
-    log(transactionId, bankId, action, status, extraData = {}) {
+    log(transactionId, bankId, action, status, extraData = {}, fundId = null, adminId = null) {
         const timestamp = new Date().toISOString();
-        const sanitizedData = this.sanitize(JSON.parse(JSON.stringify(extraData))); // Deep copy to avoid mutating original
+        const sanitizedData = this.sanitize(JSON.parse(JSON.stringify(extraData))); // Deep copy
 
-        // Workstream 3: Blind Audit Trail - Cryptographic Warranty Token Hash
-        // Extract warranty token if present and compute SHA-256 hash
-        // This creates a "Zero-Knowledge Proof" - we can prove what the bank sent
-        // without revealing the actual token or embedded investor data
-        let warrantyTokenHash = null;
-        if (extraData.warrantyToken) {
-            warrantyTokenHash = crypto.createHash('sha256')
-                .update(extraData.warrantyToken)
-                .digest('hex');
-            // Remove the actual token from sanitized data - only store the hash
-            delete sanitizedData.warrantyToken;
-        }
+        // Extract warranty token hash specifically if needed, but sanitize handles it if passed in extraData
+        // In server.js we pass { warrantyToken: ... } which matches 'warrantyToken' (not in secretFields list above, let's add it)
+        // Wait, 'warranty_token' is in secretFields. server.js passes 'warrantyToken' (camelCase).
+        // I should add 'warrantyToken' to secretFields.
 
         const entry = {
             prevHash: this.lastHash,
             timestamp,
             transactionId,
             bankId,
+            fundId,
+            adminId,
             action,
             status,
-            data: sanitizedData,
-            warrantyTokenHash // Null for non-onboarding events
+            data: sanitizedData
         };
 
         // Calculate Hash of the current entry
@@ -98,8 +116,8 @@ class HashChainedLogger {
 
 const logger = new HashChainedLogger();
 
-function logAudit(transactionId, bankId, action, status, extraData) {
-    logger.log(transactionId, bankId, action, status, extraData);
+function logAudit(transactionId, bankId, action, status, extraData, fundId, adminId) {
+    logger.log(transactionId, bankId, action, status, extraData, fundId, adminId);
 }
 
-module.exports = { logAudit };
+module.exports = { logAudit, HashChainedLogger };

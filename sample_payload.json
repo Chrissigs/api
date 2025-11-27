@@ -1,0 +1,16 @@
+{
+    "header": {
+        "transaction_id": "TXN-123456789",
+        "bank_id": "BANK_CAYMAN_01",
+        "fund_id": "FUND_ID_A",
+        "timestamp": "2023-10-27T10:00:00Z"
+    },
+    "investor_identity": {
+        "legal_name": "John Doe",
+        "nationality": "US"
+    },
+    "compliance_warranty": {
+        "kyc_status": "VERIFIED",
+        "warranty_token": "ey..."
+    }
+}

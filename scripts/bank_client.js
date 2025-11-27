@@ -22,15 +22,17 @@ const options = {
 
 const payload = {
     header: {
-        timestamp: new Date().toISOString(), // Use current time
-        bank_id: "CNB-KY-001",
+        timestamp: new Date().toISOString(),
+        bank_id: "BANK-001",
         transaction_id: "UUID-1234-5678"
     },
     investor_identity: {
         legal_name: "Johnathan Doe",
         date_of_birth: "1980-01-01",
-        nationality: "KY",
-        tax_residency: "KY"
+        nationality: "US",
+        tax_residency: [
+            { country: "US", tin: "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855" }
+        ]
     },
     compliance_warranty: {
         kyc_status: "VERIFIED",

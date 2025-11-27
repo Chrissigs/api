@@ -2,7 +2,7 @@
 node_modules/
 package-lock.json
 
-# Redis
+# Redis (downloaded for local testing)
 redis/
 redis.zip
 *.rdb
@@ -30,10 +30,13 @@ Thumbs.db
 
 # Test artifacts
 coverage/
+audit_ledger.jsonl
+evidence_vault/
+test_module3.bat
 
 # Temporary files
 *.tmp
 temp/
 
-# Certificate files (keep structure but not sensitive certs in real deployment)
-# certs/*.pem - Commented out to include demo certs for testing
+# Certificate files
+certs/

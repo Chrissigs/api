@@ -5,8 +5,8 @@ const crypto = require('crypto');
 /**
  * Mock Fund Administrator Webhook Server
  * 
- * Simulates a third-party administrator (e.g., Citco, Apex) receiving
- * verification webhooks from the Walkers Protocol System.
+ * Simulates a third-party fund administrator receiving
+ * verification webhooks from the Protocol System.
  * 
  * This validates HMAC signatures to prevent spoofing attacks.
  * 
@@ -17,7 +17,7 @@ const app = express();
 const PORT = 4000;
 
 // Shared secret (must match server.js WEBHOOK_SECRET)
-const WEBHOOK_SECRET = process.env.WEBHOOK_SECRET || 'shared-secret-key-demo-123';
+const WEBHOOK_SECRET = process.env.WEBHOOK_SECRET || 'TEST_SHARED_SECRET_123';
 
 app.use(bodyParser.json());
 
@@ -27,7 +27,7 @@ const receivedEvents = [];
 /**
  * Verify HMAC signature
  * @param {object} payload - Request body
- * @param {string} signature - Received signature from X-Walkers-Signature header
+ * @param {string} signature - Received signature from X-Protocol-Signature header
  * @returns {boolean} - True if signature is valid
  */
 function verifySignature(payload, signature) {
@@ -41,11 +41,11 @@ function verifySignature(payload, signature) {
 
 /**
  * Webhook Ingestion Endpoint
- * Receives INVESTOR_VERIFIED events from Walkers Protocol System
+ * Receives INVESTOR_VERIFIED events from Protocol System
  */
-app.post('/v1/walkers-ingest', (req, res) => {
+app.post('/v1/admin-ingest', (req, res) => {
     const payload = req.body;
-    const receivedSignature = req.headers['x-walkers-signature'];
+    const receivedSignature = req.headers['x-protocol-signature'];
 
     console.log('========================================');
     console.log('[MOCK ADMIN] Webhook Received');
@@ -54,11 +54,16 @@ app.post('/v1/walkers-ingest', (req, res) => {
     console.log(`Event Type: ${payload.event_type}`);
     console.log(`Investor: ${payload.investor_profile?.legal_name}`);
     console.log(`Fund: ${payload.fund_id}`);
+
+    // Simulate multi-tenant routing
+    const adminId = payload.fund_id === 'FUND_DEMO_02' ? 'ADMIN_BETA' : 'ADMIN_ALPHA';
+    console.log(`[ROUTING] Routed to: ${adminId}`);
+
     console.log(`Received Signature: ${receivedSignature?.substring(0, 32)}...`);
 
     // Validate signature
     if (!receivedSignature) {
-        console.error('[MOCK ADMIN] ✗ REJECTED: Missing X-Walkers-Signature header');
+        console.error('[MOCK ADMIN] ✗ REJECTED: Missing X-Protocol-Signature header');
         return res.status(401).json({
             error: 'Unauthorized',
             reason: 'Missing signature header'
@@ -123,8 +128,8 @@ app.listen(PORT, () => {
     console.log('MOCK FUND ADMINISTRATOR SERVER');
     console.log('========================================');
     console.log(`Listening on port ${PORT}`);
-    console.log(`Webhook endpoint: POST http://localhost:${PORT}/v1/walkers-ingest`);
+    console.log(`Webhook endpoint: POST http://localhost:${PORT}/v1/admin-ingest`);
     console.log(`Shared secret: ${WEBHOOK_SECRET}`);
     console.log('========================================\n');
-    console.log('Waiting for webhooks from Walkers Protocol System...\n');
+    console.log('Waiting for webhooks from Protocol System...\n');
 });

@@ -1,0 +1,41 @@
+<?xml version="1.0"?>
+<Document xmlns="urn:iso:std:iso:20022:tech:xsd:camt.053.001.09">
+    <BkToCstmrStmt>
+        <GrpHdr>
+            <MsgId>MSG-1764004098644</MsgId>
+            <CreDtTm>2025-11-24T17:08:18.644Z</CreDtTm>
+            <NbOfTxs>1</NbOfTxs>
+            <CtrlSum>0.00</CtrlSum>
+            <InitgPty>
+                <Nm>REGULATORY ENTITY</Nm>
+            </InitgPty>
+        </GrpHdr>
+        <Stmt>
+            <Id>STMT-1764004098645</Id>
+            <ElctrncSeqNb>1</ElctrncSeqNb>
+            <CreDtTm>2025-11-24T17:08:18.645Z</CreDtTm>
+            <FrToDt>
+                <FrDtTm>2025-11-24T17:08:18.645Z</FrDtTm>
+                <ToDtTm>2025-11-24T17:08:18.645Z</ToDtTm>
+            </FrToDt>
+            <Acct>
+                <Id>
+                    <IBAN>BANK_CAYMAN_01</IBAN>
+                </Id>
+                <Ccy>USD</Ccy>
+            </Acct>
+            <Ntry>
+                <Amt Ccy="USD">0.00</Amt>
+                <CdtDbtInd>CRDT</CdtDbtInd>
+                <Sts>BOOK</Sts>
+                <BookgDt>
+                    <DtTm>2025-11-24T17:08:18.645Z</DtTm>
+                </BookgDt>
+                <ValDt>
+                    <DtTm>2025-11-24T17:08:18.645Z</DtTm>
+                </ValDt>
+                <AddtlNtryInf>Investor: John Doe</AddtlNtryInf>
+            </Ntry>
+        </Stmt>
+    </BkToCstmrStmt>
+</Document>

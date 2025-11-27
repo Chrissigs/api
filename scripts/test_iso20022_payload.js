@@ -53,7 +53,7 @@ const complianceWarranty = {
 
 // Create JWT (Warranty Token)
 const jwtPayload = {
-    iss: "CNB-KY-001",  // Issuer: Butterfield Bank
+    iss: "BANK-001",  // Issuer: Example Introducer Bank
     iat: Math.floor(Date.now() / 1000),
     exp: Math.floor(Date.now() / 1000) + (60 * 60),  // 1 hour expiry
     investor_identity: {
@@ -69,7 +69,7 @@ const warrantyToken = jwt.sign(jwtPayload, bankPrivateKey, { algorithm: 'RS256' 
 const payload = {
     header: {
         timestamp: new Date().toISOString(),
-        bank_id: "CNB-KY-001",
+        bank_id: "BANK-001",
         transaction_id: `TXN-ISO20022-${Date.now()}`
     },
     investor_identity: investorIdentity,

@@ -13,7 +13,7 @@ const payload = {
         transaction_id: 'TEST-TX-001'
     },
     investor_identity: {
-        legal_name: 'SECRET NAME',
+        legal_name: 'TEST_INVESTOR_NAME',
         date_of_birth: '1990-01-01',
         nationality: 'KY',
         tax_residency: 'KY'
@@ -21,7 +21,7 @@ const payload = {
     compliance_warranty: {
         kyc_status: 'VERIFIED',
         screening_status: 'CLEAR',
-        warranty_token: 'SECRET_TOKEN_123'
+        warranty_token: 'TEST_WARRANTY_TOKEN'
     }
 };
 
@@ -77,7 +77,7 @@ async function runTests() {
     // Test 2: Auth Success (Correct Token)
     console.log('\nTest 2: Auth Success (Correct Token)');
     await new Promise(resolve => {
-        makeRequest('test-secret-token', (status, body) => {
+        makeRequest('test-token', (status, body) => {
             if (status === 201 || status === 400) { // 400 is acceptable if signature validation fails (we don't have a real signature here)
                 // Actually, looking at server.js, it validates schema first. 
                 // If we don't provide a valid signature, it might fail validation or signature check.

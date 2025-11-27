@@ -20,9 +20,26 @@ const RETRY_DELAYS_MS = [30000, 120000, 600000, 1800000, 7200000]; // 30s, 2m, 1
  * @param {string} signature - HMAC signature
  */
 async function queueWebhookRetry(eventId, payload, adminUrl, signature) {
+    // 1.3 Durable State Engine: Write-Ahead Log
+    const wal = require('./wal-service');
+
+    try {
+        await wal.write({
+            type: 'WEBHOOK_RETRY',
+            eventId,
+            payload,
+            adminUrl,
+            signature
+        });
+        console.log(`[WAL] Event ${eventId} persisted to disk.`);
+    } catch (walErr) {
+        console.error('[WAL] CRITICAL: Failed to persist event. Data loss risk!', walErr);
+        // We continue to try memory/Redis queuing even if WAL fails, but this is a critical error.
+    }
+
     if (!isRedisHealthy()) {
         console.error('[WEBHOOK QUEUE] CRITICAL: Cannot queue retry - Redis unavailable');
-        console.error(`[WEBHOOK QUEUE] Event ${eventId} will be LOST without manual intervention`);
+        console.error(`[WEBHOOK QUEUE] Event ${eventId} is safely in WAL but cannot be processed immediately.`);
         return false;
     }
 
