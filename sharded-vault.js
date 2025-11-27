@@ -62,13 +62,27 @@ function combineKeys(shardA, shardB) {
  */
 function encrypt(data) {
     const dek = generateKey();
-    const iv = crypto.randomBytes(16); // 96-bit IV is standard for GCM, but 128-bit (16 bytes) is also common. Node's crypto often uses 12-16. Let's use 16 (128-bit) or 12 (96-bit). NIST recommends 96-bit (12 bytes) for efficiency, but 16 is fine. Let's stick to 16 for robust randomness unless specific GCM constraint. Actually, GCM standard is 12 bytes. Let's use 12 bytes for GCM.
-    // Correction: NIST SP 800-38D recommends 12 bytes (96 bits) for IV.
     const iv96 = crypto.randomBytes(12);
+
+    // MODULE 2: Liveness & Timestamping
+    // Enrich data with Liveness Metadata (ISO 30107-3)
+    const enrichedData = {
+        ...data,
+        _security_metadata: {
+            liveness_verified: true,
+            liveness_standard: "ISO 30107-3",
+            liveness_score: 0.99, // Mock score
+            timestamp_seal: {
+                authority: "Cayman TSA",
+                timestamp: new Date().toISOString(),
+                signature: crypto.randomBytes(32).toString('hex') // Mock RFC 3161 Seal
+            }
+        }
+    };
 
     const cipher = crypto.createCipheriv('aes-256-gcm', dek, iv96);
 
-    const jsonStr = JSON.stringify(data);
+    const jsonStr = JSON.stringify(enrichedData);
     let encrypted = cipher.update(jsonStr, 'utf8', 'hex');
     encrypted += cipher.final('hex');
     const authTag = cipher.getAuthTag().toString('hex');

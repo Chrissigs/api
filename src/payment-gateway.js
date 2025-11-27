@@ -9,7 +9,7 @@ class PaymentGateway {
     constructor() {
         // Mock Account Ledger
         this.accounts = {
-            'ACC-998877': { balance: 1000000, currency: 'KYD', name: 'Alex Taylor' },
+            'ACC-998877': { balance: 1000000, currency: 'KYD', name: 'John Doe' },
             'ACC-112233': { balance: 5000, currency: 'KYD', name: 'Small Investor' }
         };
     }
