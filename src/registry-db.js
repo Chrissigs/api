@@ -1,122 +1,69 @@
-const fs = require('fs');
-const path = require('path');
+const db = require('./db');
 
 /**
- * Registry Database (Lightweight)
+ * Registry Database (PostgreSQL)
  * 
- * In production, this would be a PostgreSQL database.
- * For this prototype/pilot, we use a JSON file to ensure portability and zero-dependency setup.
- * 
- * Schema:
- * - deeds: Array of Deed objects
- *   - id: string (Contract ID)
- *   - bank_id: string
- *   - status: 'ACTIVE' | 'SUSPENDED' | 'EXPIRED'
- *   - expiry_date: string (ISO Date)
- *   - created_at: string (ISO Date)
+ * Stores Deeds of Reliance and Institution data.
  */
 
-const DB_FILE = path.join(__dirname, '../data/registry_db.json');
-const DATA_DIR = path.join(__dirname, '../data');
-
-// Ensure data directory exists
-if (!fs.existsSync(DATA_DIR)) {
-    fs.mkdirSync(DATA_DIR);
-}
-
-// Initialize DB if not exists
-if (!fs.existsSync(DB_FILE)) {
-    const initialData = {
-        deeds: [
-            {
-                id: 'DEED-2025-001',
-                bank_id: 'BANK_CAYMAN_01',
-                status: 'ACTIVE',
-                expiry_date: '2026-12-31T23:59:59Z',
-                created_at: new Date().toISOString()
-            }
-        ]
-    };
-    fs.writeFileSync(DB_FILE, JSON.stringify(initialData, null, 2));
-}
-
 class RegistryDB {
-    constructor() {
-        this.dbPath = DB_FILE;
-    }
-
-    _readDB() {
-        try {
-            const data = fs.readFileSync(this.dbPath, 'utf8');
-            return JSON.parse(data);
-        } catch (err) {
-            console.error('[REGISTRY DB] Error reading DB:', err);
-            return { deeds: [] };
-        }
-    }
-
-    _writeDB(data) {
-        try {
-            fs.writeFileSync(this.dbPath, JSON.stringify(data, null, 2));
-            return true;
-        } catch (err) {
-            console.error('[REGISTRY DB] Error writing DB:', err);
-            return false;
-        }
-    }
 
     /**
      * Check the status of a Deed of Reliance for a given Bank.
      * @param {string} bankId 
-     * @returns {object} { valid: boolean, status: string, deed: object }
+     * @returns {Promise<object>} { valid: boolean, status: string, deed: object }
      */
-    checkDeedStatus(bankId) {
-        const db = this._readDB();
-        const deed = db.deeds.find(d => d.bank_id === bankId);
+    async checkDeedStatus(bankId) {
+        try {
+            const res = await db.query(
+                'SELECT * FROM deeds WHERE bank_id = $1 ORDER BY created_at DESC LIMIT 1',
+                [bankId]
+            );
 
-        if (!deed) {
-            return { valid: false, status: 'NOT_FOUND', reason: 'No Deed of Reliance on file' };
+            if (res.rows.length === 0) {
+                return { valid: false, status: 'NOT_FOUND', reason: 'No Deed of Reliance on file' };
+            }
+
+            const deed = res.rows[0];
+
+            if (deed.status !== 'ACTIVE') {
+                return { valid: false, status: deed.status, reason: `Deed is ${deed.status}` };
+            }
+
+            const now = new Date();
+            const expiry = new Date(deed.expiry_date);
+            if (now > expiry) {
+                // Auto-expire if past date
+                await db.query('UPDATE deeds SET status = $1 WHERE transaction_id = $2', ['EXPIRED', deed.transaction_id]);
+                return { valid: false, status: 'EXPIRED', reason: 'Deed has expired' };
+            }
+
+            return { valid: true, status: 'ACTIVE', deed };
+        } catch (err) {
+            console.error('[REGISTRY DB] Error checking deed status:', err);
+            return { valid: false, status: 'ERROR', reason: 'Database error' };
         }
-
-        if (deed.status !== 'ACTIVE') {
-            return { valid: false, status: deed.status, reason: `Deed is ${deed.status}` };
-        }
-
-        const now = new Date();
-        const expiry = new Date(deed.expiry_date);
-        if (now > expiry) {
-            // Auto-expire if past date
-            deed.status = 'EXPIRED';
-            this._writeDB(db);
-            return { valid: false, status: 'EXPIRED', reason: 'Deed has expired' };
-        }
-
-        return { valid: true, status: 'ACTIVE', deed };
     }
 
     /**
      * Register or Update a Deed
      */
-    registerDeed(bankId, contractId, expiryDate) {
-        const db = this._readDB();
-        const existingIndex = db.deeds.findIndex(d => d.bank_id === bankId);
+    async registerDeed(bankId, contractId, expiryDate) {
+        try {
+            // Insert or Update (Upsert logic if transaction_id matches, but here we assume new contractId is unique)
+            // If we want to replace the active deed for the bank, we might want to invalidate old ones, but for now we just insert.
 
-        const newDeed = {
-            id: contractId,
-            bank_id: bankId,
-            status: 'ACTIVE',
-            expiry_date: expiryDate,
-            created_at: new Date().toISOString()
-        };
+            await db.query(
+                `INSERT INTO deeds (transaction_id, contract_id, bank_id, expiry_date, status)
+                 VALUES ($1, $2, $3, $4, 'ACTIVE')
+                 ON CONFLICT (transaction_id) DO UPDATE SET status = 'ACTIVE', expiry_date = $4`,
+                [contractId, contractId, bankId, expiryDate] // Using contractId as transaction_id for now based on previous logic
+            );
 
-        if (existingIndex >= 0) {
-            db.deeds[existingIndex] = newDeed;
-        } else {
-            db.deeds.push(newDeed);
+            console.log(`[REGISTRY DB] Deed registered for ${bankId} (Contract: ${contractId})`);
+        } catch (err) {
+            console.error('[REGISTRY DB] Error registering deed:', err);
         }
-
-        this._writeDB(db);
-        console.log(`[REGISTRY DB] Deed registered for ${bankId} (Contract: ${contractId})`);
     }
 }
 

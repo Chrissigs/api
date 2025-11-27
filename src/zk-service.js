@@ -1,67 +1,67 @@
-const crypto = require('crypto');
+const snarkjs = require('snarkjs');
+const path = require('path');
+const fs = require('fs');
 
 /**
- * Zero-Knowledge Proof Service (Mock)
+ * Zero-Knowledge Proof Service
  * 
- * In a real application, this would use `snarkjs` and `circom`.
- * We simulate the behavior:
- * 1. Prover (Client/Bank) generates a proof from private inputs (Identity).
- * 2. Verifier (Registry/Admin) checks the proof against a public verification key.
- * 3. No private data is revealed.
+ * Uses `snarkjs` and `circom` artifacts to generate and verify proofs.
  */
 
 class ZKService {
     constructor() {
-        this.verificationKey = 'mock-verification-key-123';
+        // Paths to circuit artifacts
+        // Note: These files must be generated via `circom` and the trusted setup ceremony
+        this.wasmPath = path.join(__dirname, '../circuits/identity_js/identity.wasm');
+        this.zkeyPath = path.join(__dirname, '../circuits/identity_final.zkey');
+        this.vKeyPath = path.join(__dirname, '../circuits/verification_key.json');
     }
 
     /**
      * Generate a ZK Proof.
-     * @param {object} input - Private inputs (e.g., identity, tax_id)
-     * @returns {object} { proof: string, publicSignals: array }
+     * @param {object} input - Private inputs (e.g., { private_legal_name: 123, ... })
+     * @returns {Promise<object>} { proof, publicSignals }
      */
-    generateProof(input) {
+    async generateProof(input) {
         console.log('[ZK] Generating Zero-Knowledge Proof...');
 
-        // Simulate computational work
-        const proofHash = crypto.createHash('sha256').update(JSON.stringify(input)).digest('hex');
+        if (!fs.existsSync(this.wasmPath) || !fs.existsSync(this.zkeyPath)) {
+            throw new Error('Circuit artifacts not found. Please compile circuit and run trusted setup.');
+        }
 
-        // Mock SnarkJS Proof Structure
-        const proof = {
-            pi_a: [`0x${proofHash.substring(0, 10)}...`, "0x..."],
-            pi_b: [[`0x...`, `0x...`], [`0x...`, `0x...`]],
-            pi_c: [`0x...`, "0x..."],
-            protocol: "groth16",
-            curve: "bn128"
-        };
-
-        // Public Signals (what we are proving *about* the data, without revealing it)
-        // E.g., "User is from KY", "User is not on Sanctions List"
-        const publicSignals = [
-            "1", // 1 = Valid Jurisdiction (KY)
-            "0"  // 0 = No Sanctions Match
-        ];
-
-        console.log('[ZK] Proof Generated.');
-        return { proof, publicSignals };
+        try {
+            // fullProve generates the proof and calculates the public signals
+            const { proof, publicSignals } = await snarkjs.groth16.fullProve(input, this.wasmPath, this.zkeyPath);
+            console.log('[ZK] Proof Generated.');
+            return { proof, publicSignals };
+        } catch (error) {
+            console.error('[ZK] Proof Generation Failed:', error);
+            throw error;
+        }
     }
 
     /**
      * Verify a ZK Proof.
      * @param {object} proof 
      * @param {array} publicSignals 
-     * @returns {boolean}
+     * @returns {Promise<boolean>}
      */
-    verifyProof(proof, publicSignals) {
+    async verifyProof(proof, publicSignals) {
         console.log('[ZK] Verifying Proof...');
 
-        // In a mock, we just check if the proof structure looks valid
-        if (!proof || !proof.pi_a || !publicSignals) {
+        if (!fs.existsSync(this.vKeyPath)) {
+            console.error('[ZK] Verification Key not found.');
             return false;
         }
 
-        // Simulate verification success
-        return true;
+        try {
+            const vKey = JSON.parse(fs.readFileSync(this.vKeyPath, 'utf-8'));
+            const res = await snarkjs.groth16.verify(vKey, publicSignals, proof);
+            return res;
+        } catch (error) {
+            console.error('[ZK] Verification Failed:', error);
+            return false;
+        }
     }
 }
 

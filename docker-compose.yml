@@ -1,0 +1,54 @@
+version: '3.8'
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres_password
+      POSTGRES_DB: passport_ky
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./migrations:/docker-entrypoint-initdb.d
+
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+
+  nrl-server:
+    build: .
+    command: npm start
+    ports:
+      - "3000:3000"
+    environment:
+      - PORT=3000
+      - DB_HOST=postgres
+      - DB_USER=postgres
+      - DB_PASSWORD=postgres_password
+      - DB_NAME=passport_ky
+      - REDIS_URL=redis://redis:6379
+      - WEBHOOK_SECRET=dev_secret
+      - API_AUTH_TOKEN=dev_token
+    depends_on:
+      - postgres
+      - redis
+
+  bank-node:
+    build: .
+    command: node scripts/bank_node.js
+    ports:
+      - "3001:3001"
+    environment:
+      - PORT=3001
+      - NRL_SERVER_URL=http://nrl-server:3000
+    depends_on:
+      - nrl-server
+
+volumes:
+  postgres_data:
+  redis_data:

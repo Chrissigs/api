@@ -1,42 +1,37 @@
 # Dependencies
 node_modules/
-package-lock.json
-
-# Redis (downloaded for local testing)
-redis/
-redis.zip
-*.rdb
-dump.rdb
-
-# Logs
-*.log
-logs/
 
 # Environment variables
 .env
-.env.local
-.env.production
 
-# IDE
+# Data and Logs
+data/
+evidence_vault/
+logs/
+*.log
+*.jsonl
+
+# Certificates and Keys
+certs/
+*.pem
+*.key
+
+# ZK Circuits Artifacts (Large files)
+circuits/*.r1cs
+circuits/*.zkey
+circuits/*.ptau
+circuits/*.wasm
+!circuits/identity.circom
+
+# IDEs
 .vscode/
 .idea/
-*.swp
-*.swo
-*~
 
 # OS
 .DS_Store
 Thumbs.db
 
-# Test artifacts
-coverage/
-audit_ledger.jsonl
-evidence_vault/
-test_module3.bat
-
-# Temporary files
-*.tmp
-temp/
-
-# Certificate files
-certs/
+# Frontend (if present)
+bank-frontend/node_modules/
+bank-frontend/dist/
+bank-frontend/build/
