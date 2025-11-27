@@ -1,10 +1,11 @@
 {
-  "name": "project_passport",
-  "version": "1.0.0",
-  "description": "Project Passport API Prototype",
-  "main": "src/server.js",
+  "name": "passport-project-ky",
+  "version": "1.0.0-RC1",
+  "description": "Cayman Islands Sovereign Identity & Reliance Network",
+  "main": "src/nrl-server.js",
   "scripts": {
-    "start": "node src/server.js"
+    "start": "node src/nrl-server.js",
+    "verify-passport": "node scripts/passport_verification_suite.js"
   },
   "dependencies": {
     "axios": "^1.6.0",

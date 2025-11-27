@@ -1,67 +1,53 @@
-# Project Antigravity: Cayman Verifiable Trust Protocol
+# Passport Project KY: Cayman Verifiable Trust Protocol
 
-**Status**: Prototype / Reference Implementation
+**Status**: Release Candidate (RC1)
 **Standards**: W3C Verifiable Credentials, ISO 20022, ISO 30107-3, RFC 3161
 
 ## Overview
-Project Antigravity is a Digital Identity Network designed to meet Cayman Islands regulations (Regulation 25), eIDAS standards, and global payments interoperability (ISO 20022). It transforms the "Status Token" into a W3C Verifiable Credential (JSON-LD) secured by a Split-Key "Sharded Vault".
+Passport Project KY is a Sovereign Digital Identity Network designed to meet Cayman Islands regulations (Regulation 25), eIDAS standards, and global payments interoperability (ISO 20022). It enables Cayman Islands financial institutions to issue W3C-compliant identity credentials backed by a Split-Key Liability Shield.
 
-## Architecture Modules
+## System Architecture (The 4 Pillars)
 
-### 1. Credential Engine (W3C VC)
-- **Format**: JSON-LD Verifiable Credentials (W3C VC Data Model v2.0).
-- **Signing**: JWS (JSON Web Signature) using `jsonwebtoken`.
-- **Schema**: `credential-schema.jsonld` maps `Nm` and `PstlAdr` to ISO 20022.
+### Module A: The Credential Authority (Issuance)
+- **Standard**: W3C Verifiable Credentials Data Model v2.0.
+- **Schema**: `passport-schema.jsonld` (Maps `Nm` and `PstlAdr` to ISO 20022).
+- **Issuer**: `did:web:butterfield.ky` (Authorised Issuance Node).
+- **Output**: JWS-signed KY-Credential.
 
-### 2. Sharded Vault 2.0
-- **Encryption**: AES-256-GCM Split-Key (Governance Shard + Control Shard).
-- **Compliance**: RFC 3161 Timestamping and ISO 30107-3 Liveness metadata.
-- **Privacy**: PII is encrypted at rest; the API never holds the decryption key.
+### Module B: The Sharded Evidence Vault (Storage)
+- **Encryption**: AES-256-GCM Split-Key Architecture.
+- **Shard A**: Governance Shard (Stored by NRL/WPS).
+- **Shard B**: Control Shard (Returned to AIN).
+- **Compliance**: `liveness_standard: "ISO 30107-3"`, `timestamp_seal` (RFC 3161).
 
-### 3. Reliance Monitor (Risk Engine)
-- **Active Testing**: Automated "Spot Checks" (ReconstructRequest) to ensure the Bank maintains control of Shard B.
-- **Revocation**: Instant invalidation via Redis-backed revocation registry.
+### Module C: The Reliance Monitor (Active Risk)
+- **Function**: Automated "Spot Check" Bot.
+- **Logic**: Samples 1% of active investors daily. Sends `ReconstructRequest` to AIN.
+- **Enforcement**: Auto-revokes credential if Shard B is not returned within 60s.
 
-### 4. Interoperability Bridge
-- **OIDC**: `.well-known/openid-configuration` discovery endpoint.
-- **Token Exchange**: RFC 8693 compliant endpoint to swap Bank Credentials for Fund Subscription Tokens.
+### Module D: The Interoperability Gateway (Global)
+- **Protocol**: OpenID Connect (OIDC) & RFC 8693 (Token Exchange).
+- **Endpoints**:
+    - `GET /.well-known/openid-configuration`
+    - `POST /v1/token` (Exchange KY-Credential for Fund-Access-Token).
 
-## Setup & Installation
+## Setup & Verification
 
-1.  **Prerequisites**: Node.js v16+, Redis (optional, for revocation).
-2.  **Install Dependencies**:
+1.  **Install Dependencies**:
     ```bash
     npm install
     ```
-3.  **Generate Keys** (for demo purposes):
+
+2.  **Run the Comprehensive Check (GMP Demo)**:
     ```bash
-    # Keys are automatically generated if not found in ./certs
+    npm run verify-passport
+    ```
+    *Executes the "Clean Room", "Fire Drill", "Kill Switch", and "Passport Scan" tests.*
+
+3.  **Start the National Reliance Ledger (NRL)**:
+    ```bash
+    npm start
     ```
 
-## Usage
-
-### Start the Server (Interoperability Bridge)
-```bash
-node src/updated-server.js
-```
-*Runs on port 3000 by default.*
-
-### Run the Reliance Monitor
-```bash
-node src/reliance-monitor.js
-```
-*Simulates a monthly audit cycle.*
-
-### Verify the Upgrade
-```bash
-node scripts/verify_upgrade.js
-```
-*Runs a comprehensive test suite for all modules.*
-
-## Configuration
-- `WEBHOOK_SECRET`: Shared secret for admin notifications (default provided for demo).
-- `API_AUTH_TOKEN`: Bearer token for API access (default provided for demo).
-- `BANK_NODE_URL`: URL of the Bank Node for spot checks.
-
 ## Disclaimer
-This is a reference implementation for architectural demonstration purposes. It uses mock cryptographic keys and simulated external services. Do not use in production without replacing the key management and security layers with HSM-backed solutions.
+This is a sovereign-grade reference implementation. Ensure all cryptographic keys are managed via HSM in production environments.

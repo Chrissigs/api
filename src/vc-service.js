@@ -31,20 +31,20 @@ try {
 
 const CONTEXT = [
     "https://www.w3.org/2018/credentials/v1",
-    "https://cayman-standards.gov.ky/credentials/v1"
+    "https://passport.ky/credentials/v1"
 ];
 
 /**
- * Issues a Verifiable Credential (JWS format)
+ * Issues a KY-Credential (JWS format)
  * @param {string} subjectDid - The DID of the subject (investor)
  * @param {Object} claims - The claims about the subject (Nm, KycStatus, etc.)
- * @param {string} issuerDid - The DID of the issuer (Bank)
+ * @param {string} issuerDid - The DID of the issuer (AIN)
  * @returns {string} The signed VC (JWT)
  */
-function issueCredential(subjectDid, claims, issuerDid = 'did:web:example-bank.com') {
+function issueCredential(subjectDid, claims, issuerDid = 'did:web:butterfield.ky') {
     const credential = {
         "@context": CONTEXT,
-        "type": ["VerifiableCredential", "CaymanInvestorCredential"],
+        "type": ["VerifiableCredential", "KYCredential"],
         "issuer": issuerDid,
         "issuanceDate": new Date().toISOString(),
         "credentialSubject": {

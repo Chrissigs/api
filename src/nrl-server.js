@@ -36,10 +36,10 @@ app.use(bodyParser.json());
 // OIDC Discovery Endpoint
 app.get('/.well-known/openid-configuration', (req, res) => {
     res.json({
-        issuer: 'https://cayman-trust-protocol.com',
-        authorization_endpoint: 'https://cayman-trust-protocol.com/oauth/authorize',
-        token_endpoint: 'https://cayman-trust-protocol.com/v1/token',
-        jwks_uri: 'https://cayman-trust-protocol.com/.well-known/jwks.json',
+        issuer: 'https://passport.ky',
+        authorization_endpoint: 'https://passport.ky/oauth/authorize',
+        token_endpoint: 'https://passport.ky/v1/token',
+        jwks_uri: 'https://passport.ky/.well-known/jwks.json',
         response_types_supported: ['code', 'token', 'id_token'],
         subject_types_supported: ['public'],
         id_token_signing_alg_values_supported: ['RS256', 'EdDSA']
@@ -54,8 +54,8 @@ app.post('/v1/token', async (req, res) => {
         return res.status(400).json({ error: 'unsupported_grant_type' });
     }
 
-    // Verify the incoming "Bank Credential" (subject_token)
-    // In a real flow, this would be the VC issued by the Bank
+    // Verify the incoming "KY-Credential" (subject_token)
+    // In a real flow, this would be the VC issued by the AIN
     const verification = vcService.verifyCredential(subject_token);
 
     if (!verification.valid) {

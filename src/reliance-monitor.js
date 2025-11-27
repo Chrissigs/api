@@ -32,7 +32,7 @@ async function performSpotCheck(credential) {
         const startTime = Date.now();
 
         // Trigger ReconstructRequest
-        // The Bank must return Shard B to prove they still hold it and are online
+        // The AIN must return Shard B to prove they still hold it and are online
         const response = await axios.post(`${BANK_NODE_URL}/v1/reconstruct-request`, {
             transaction_id: credential.transaction_id,
             challenge: Date.now().toString()
@@ -46,7 +46,7 @@ async function performSpotCheck(credential) {
             console.log(`[RELIANCE MONITOR] ✓ Verified ${credential.transaction_id} in ${duration}ms.`);
             return true;
         } else {
-            throw new Error('Invalid response from Bank Node');
+            throw new Error('Invalid response from AIN');
         }
 
     } catch (error) {
