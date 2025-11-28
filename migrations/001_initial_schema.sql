@@ -29,6 +29,17 @@ CREATE TABLE IF NOT EXISTS audit_log (
     timestamp TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
 );
 
+-- Evidence Vault Table (Replaces file-based storage)
+CREATE TABLE IF NOT EXISTS evidence (
+    transaction_id VARCHAR(255) PRIMARY KEY,
+    bank_id VARCHAR(255) NOT NULL,
+    encrypted_blob TEXT NOT NULL,
+    iv VARCHAR(255) NOT NULL,
+    auth_tag VARCHAR(255) NOT NULL,
+    shard_a TEXT NOT NULL, -- Governance Shard
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+);
+
 -- Index for fast lookups
 CREATE INDEX idx_deeds_contract_id ON deeds(contract_id);
 CREATE INDEX idx_audit_log_timestamp ON audit_log(timestamp);

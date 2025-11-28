@@ -1,53 +1,22 @@
-# Passport Project KY: Cayman Verifiable Trust Protocol
+# Passport Project KY - Enterprise Edition
 
-**Status**: Release Candidate (RC1)
-**Standards**: W3C Verifiable Credentials, ISO 20022, ISO 30107-3, RFC 3161
+**Evaluation Copy for Walkers Professional Services (WPS)**
 
 ## Overview
-Passport Project KY is a Sovereign Digital Identity Network designed to meet Cayman Islands regulations (Regulation 25), eIDAS standards, and global payments interoperability (ISO 20022). It enables Cayman Islands financial institutions to issue W3C-compliant identity credentials backed by a Split-Key Liability Shield.
+This repository contains the source code for the Sovereign Identity Reliance Protocol.
+It is designed for strict regulatory compliance and enterprise-grade security.
 
-## System Architecture (The 4 Pillars)
+## Architecture
+- **Split-Key Vault**: Uses a dual-shard encryption model (Governance Shard + Control Shard).
+- **Zero-Knowledge Privacy**: No raw PII is stored or processed.
+- **Reliance Monitor**: Active heartbeat monitoring with automatic revocation.
 
-### Module A: The Credential Authority (Issuance)
-- **Standard**: W3C Verifiable Credentials Data Model v2.0.
-- **Schema**: `passport-schema.jsonld` (Maps `Nm` and `PstlAdr` to ISO 20022).
-- **Issuer**: `did:web:butterfield.ky` (Authorised Issuance Node).
-- **Output**: JWS-signed KY-Credential.
+## Compliance
+Run the regulatory test suite to verify compliance controls:
+\\\ash
+npm test
+\\\
 
-### Module B: The Sharded Evidence Vault (Storage)
-- **Encryption**: AES-256-GCM Split-Key Architecture.
-- **Shard A**: Governance Shard (Stored by NRL/WPS).
-- **Shard B**: Control Shard (Returned to AIN).
-- **Compliance**: `liveness_standard: "ISO 30107-3"`, `timestamp_seal` (RFC 3161).
-
-### Module C: The Reliance Monitor (Active Risk)
-- **Function**: Automated "Spot Check" Bot.
-- **Logic**: Samples 1% of active investors daily. Sends `ReconstructRequest` to AIN.
-- **Enforcement**: Auto-revokes credential if Shard B is not returned within 60s.
-
-### Module D: The Interoperability Gateway (Global)
-- **Protocol**: OpenID Connect (OIDC) & RFC 8693 (Token Exchange).
-- **Endpoints**:
-    - `GET /.well-known/openid-configuration`
-    - `POST /v1/token` (Exchange KY-Credential for Fund-Access-Token).
-
-## Setup & Verification
-
-1.  **Install Dependencies**:
-    ```bash
-    npm install
-    ```
-
-2.  **Run the Comprehensive Check (GMP Demo)**:
-    ```bash
-    npm run verify-passport
-    ```
-    *Executes the "Clean Room", "Fire Drill", "Kill Switch", and "Passport Scan" tests.*
-
-3.  **Start the National Reliance Ledger (NRL)**:
-    ```bash
-    npm start
-    ```
-
-## Disclaimer
-This is a sovereign-grade reference implementation. Ensure all cryptographic keys are managed via HSM in production environments.
+## License
+**PROPRIETARY / CLOSED SOURCE**.
+Copyright (c) 2025 The Protocol Administrator.

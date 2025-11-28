@@ -1,0 +1,10 @@
+{
+  "partner_id": "WPS-CAYMAN-001",
+  "role": "PRIMARY_RELIANCE_CONSUMER",
+  "anchor_status": "ACTIVE",
+  "legal_entity": "Walkers Professional Services",
+  "jurisdiction": "KY",
+  "license_tier": "ENTERPRISE_ANCHOR",
+  "integration_mode": "HARD_LINK",
+  "compliance_officer": "admin@walkersglobal.com"
+}

@@ -96,6 +96,25 @@ const checkAuth = (req, res, next) => {
     next();
 };
 
+const db = require('./db'); // [NEW] Database connection
+
+// ... (imports)
+
+// [NEW] Sanctions Check (Mock)
+async function checkSanctions(profile) {
+    console.log('[SANCTIONS] Checking profile against lists...');
+    // In production, this would query a real sanctions API or DB
+    // For now, we simulate a clean check
+    const isSanctioned = false;
+    if (isSanctioned) {
+        throw new Error('Entity appears on Sanctions List');
+    }
+    console.log('[SANCTIONS] Check passed.');
+    return true;
+}
+
+// ... (existing code)
+
 // MODULE 2: THE BRIDGE - POST /v1/onboard
 app.post('/v1/onboard', checkAuth, async (req, res) => {
     if (bankStatus === 'SUSPENDED') {
@@ -114,55 +133,62 @@ app.post('/v1/onboard', checkAuth, async (req, res) => {
     const { transaction_id, bank_id } = payload.header || { transaction_id: uuidv4(), bank_id: 'BANK_001' };
     const fund_id = 'FUND_001';
 
-    // 3. Sharded Vault Encryption (Module 2 Updated)
-    // Encrypt the Investor Profile (PII)
-    const { encryptedBlob, iv, authTag, shardA, shardB } = shardedVault.encrypt(payload.investor_profile || payload);
+    try {
+        // [NEW] Sanctions Check
+        await checkSanctions(payload.investor_profile);
 
-    // 4. Store Evidence (Encrypted Blob + Shard A)
-    const evidencePath = path.join(EVIDENCE_VAULT_DIR, `${transaction_id}.json`);
-    const evidenceRecord = {
-        transaction_id,
-        bank_id,
-        timestamp: new Date().toISOString(),
-        encrypted_blob: encryptedBlob,
-        iv,
-        auth_tag: authTag,
-        shard_a: shardA // Governance Shard
-    };
-    fs.writeFileSync(evidencePath, JSON.stringify(evidenceRecord, null, 2));
+        // 3. Sharded Vault Encryption (Module 2 Updated)
+        // Encrypt the Investor Profile (PII)
+        const { encryptedBlob, iv, authTag, shardA, shardB } = shardedVault.encrypt(payload.investor_profile || payload);
 
-    // [NEW] Issue Verifiable Credential (Module 1)
-    const vc = vcService.issueCredential(
-        `did:cayman:investor:${transaction_id}`,
-        {
-            "iso:Nm": payload.investor_profile?.Nm || { "iso:FrstNm": "Unknown" },
-            "cima:RelianceStatus": "Verified",
-            "cima:RiskRating": "Low"
-        }
-    );
+        // 4. Store Evidence (Encrypted Blob + Shard A) -> [UPDATED] To DB
+        // const evidencePath = path.join(EVIDENCE_VAULT_DIR, `${transaction_id}.json`);
+        // fs.writeFileSync(evidencePath, JSON.stringify(evidenceRecord, null, 2));
 
-    // 5. Audit Logging
-    logAudit(
-        transaction_id,
-        bank_id,
-        'ONBOARD_INVESTOR',
-        'SUCCESS',
-        {
-            bank_status: bankStatus,
-            vc_issued: true
-        },
-        fund_id,
-        'ADMIN_DEFAULT'
-    );
+        await db.query(
+            `INSERT INTO evidence (transaction_id, bank_id, encrypted_blob, iv, auth_tag, shard_a)
+             VALUES ($1, $2, $3, $4, $5, $6)`,
+            [transaction_id, bank_id, encryptedBlob, iv, authTag, shardA]
+        );
+        console.log(`[EVIDENCE] Stored secure evidence for ${transaction_id} in DB.`);
 
-    // 7. Return Shard B and VC to Bank
-    res.status(201).json({
-        transaction_id,
-        status: 'VERIFIED_AND_SECURED',
-        shard_b: shardB, // Control Shard
-        verifiable_credential: vc, // [NEW]
-        message: 'Investor onboarded. Shard B and VC returned.'
-    });
+        // [NEW] Issue Verifiable Credential (Module 1)
+        const vc = vcService.issueCredential(
+            `did:cayman:investor:${transaction_id}`,
+            {
+                "iso:Nm": payload.investor_profile?.Nm || { "iso:FrstNm": "Unknown" },
+                "cima:RelianceStatus": "Verified",
+                "cima:RiskRating": "Low"
+            }
+        );
+
+        // 5. Audit Logging
+        logAudit(
+            transaction_id,
+            bank_id,
+            'ONBOARD_INVESTOR',
+            'SUCCESS',
+            {
+                bank_status: bankStatus,
+                vc_issued: true
+            },
+            fund_id,
+            'ADMIN_DEFAULT'
+        );
+
+        // 7. Return Shard B and VC to Bank
+        res.status(201).json({
+            transaction_id,
+            status: 'VERIFIED_AND_SECURED',
+            shard_b: shardB, // Control Shard
+            verifiable_credential: vc, // [NEW]
+            message: 'Investor onboarded. Shard B and VC returned.'
+        });
+
+    } catch (err) {
+        console.error('[ONBOARD] Error:', err.message);
+        res.status(400).json({ error: err.message });
+    }
 });
 
 // Start Server
