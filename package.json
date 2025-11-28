@@ -1,24 +1,11 @@
 {
-  "name": "passport-project-ky-enterprise",
-  "version": "2.0.0-ENTERPRISE",
-  "description": "Sovereign Identity Reliance Protocol - Enterprise Edition",
-  "main": "src/nrl-server.js",
-  "scripts": {
-    "start": "node src/nrl-server.js",
-    "test": "mocha test/regulatory-tests.js",
-    "monitor": "node src/reliance-monitor.js"
-  },
-  "author": "The Protocol Administrator",
-  "license": "UNLICENSED",
+  "name": "wps-internal-protocol",
+  "version": "1.0.0-PRIVATE",
+  "description": "Walkers Professional Services - Internal Identity Protocol",
   "private": true,
-  "dependencies": {
-    "axios": "^1.6.0",
-    "express": "^4.18.2",
-    "pg": "^8.11.3",
-    "snarkjs": "^0.7.0",
-    "uuid": "^9.0.0"
+  "scripts": {
+    "start": "echo 'Starting WPS Internal Protocol...' && node src/compliance/cima-rules.js"
   },
-  "devDependencies": {
-    "mocha": "^10.2.0"
-  }
+  "author": "Walkers Professional Services",
+  "license": "UNLICENSED"
 }
