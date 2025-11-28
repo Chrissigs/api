@@ -8,13 +8,19 @@ $WorkDir = "c:\Users\chris\.gemini\antigravity\scratch\project_passport"
 # Ensure we are in the right directory
 Set-Location $WorkDir
 
-# 1. CREATE DIRECTORIES
+# 1. CLEANUP (Optional: Remove existing src/config/public to ensure clean slate)
+if (Test-Path "src") { Remove-Item -Recurse -Force "src" }
+if (Test-Path "config") { Remove-Item -Recurse -Force "config" }
+if (Test-Path "public") { Remove-Item -Recurse -Force "public" }
+if (Test-Path "test") { Remove-Item -Recurse -Force "test" }
+
+# 2. CREATE DIRECTORIES
 New-Item -ItemType Directory -Force -Path "config"
 New-Item -ItemType Directory -Force -Path "public"
 New-Item -ItemType Directory -Force -Path "src/security"
 New-Item -ItemType Directory -Force -Path "src/compliance"
 
-# 2. GENERATE FILES
+# 3. GENERATE FILES
 
 # LICENSE
 $LicenseContent = @"
@@ -42,6 +48,10 @@ Set-Content -Path "config/wps-internal.json" -Value $ConfigContent
 
 # public/dashboard.html
 $DashboardContent = @"
+<!-- 
+INTERNAL USE ONLY. PROPRIETARY ARCHITECTURE. 
+COPYRIGHT © 2025 WALKERS PROFESSIONAL SERVICES. ALL RIGHTS RESERVED.
+-->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -84,6 +94,7 @@ $DashboardContent = @"
     </div>
 
     <script>
+        // INTERNAL USE ONLY. PROPRIETARY ARCHITECTURE.
         // Simulation Logic
         let savings = 0;
         const COST_PER_VERIFICATION = 150; // $150 saved per automated check
@@ -197,7 +208,7 @@ COPYRIGHT © 2025 WALKERS PROFESSIONAL SERVICES. ALL RIGHTS RESERVED.
 "@
 Set-Content -Path "README.md" -Value $ReadmeContent
 
-# 3. GIT OPERATIONS
+# 4. GIT OPERATIONS
 Write-Host "Initializing Git..."
 git init
 git add .
