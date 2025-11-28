@@ -1,17 +1,22 @@
-# WPS Internal Identity Protocol
+# The Sovereign Bridge
 
-**INTERNAL USE ONLY. PROPRIETARY ARCHITECTURE.**
+**A Universal AML Automation Protocol for the Cayman Islands.**
 
-## Ownership
-**Owner Organization**: Walkers Fiduciary
-**System Controller**: Strategic Projects Division
+## Overview
+The Sovereign Bridge is a firm-agnostic, white-label standard for automating AML compliance.
+It allows any licensed entity (Corporate Administrator, Bank, Regulator) to participate in a unified reliance network.
 
-## Access Control
-This system is restricted to authorized personnel.
-**CRITICAL**: HSM Access is restricted to the **Head of Strategic Projects**.
+## Architecture
+- **White Label**: Fully configurable branding via \config/branding.json\.
+- **Regulation 25 Engine**: Automated checks for Simplified Due Diligence (SDD) eligibility.
+- **Role-Based Access**: Defined roles for AMLCO, MLRO, and Eligible Introducers.
 
-## Dashboard
-Access the strategic dashboard at \public/dashboard.html\ to view real-time cost savings metrics.
+## Setup
+Run the configuration wizard to initialize your node:
+1. Open \public/setup.html\ in a browser.
+2. Select your entity type.
+3. Upload your logo.
+4. Enter your license key.
 
 ---
-COPYRIGHT © 2025 WALKERS PROFESSIONAL SERVICES. ALL RIGHTS RESERVED.
+Copyright (c) 2025 The Sovereign Standard Initiative.

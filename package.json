@@ -1,11 +1,11 @@
 {
-  "name": "wps-internal-protocol",
-  "version": "1.0.0-PRIVATE",
-  "description": "Walkers Professional Services - Internal Identity Protocol",
-  "private": true,
+  "name": "sovereign-bridge-protocol",
+  "version": "1.0.0-STANDARD",
+  "description": "The Sovereign Bridge - Universal AML Automation Protocol",
+  "main": "src/compliance/regulation_25.js",
   "scripts": {
-    "start": "echo 'Starting WPS Internal Protocol...' && node src/compliance/cima-rules.js"
+    "start": "echo 'Starting Sovereign Bridge...' && node src/compliance/regulation_25.js"
   },
-  "author": "Walkers Professional Services",
-  "license": "UNLICENSED"
+  "author": "The Sovereign Standard Initiative",
+  "license": "SEE LICENSE IN LICENSE"
 }
