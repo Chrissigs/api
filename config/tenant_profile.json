@@ -1,0 +1,13 @@
+{
+  "organization_name": "[UNINITIALIZED]",
+  "license_tier": "STANDARD",
+  "role": "UNKNOWN",
+  "branding": {
+    "primary_color": "#E0E0E0",
+    "logo_url": "assets/default_logo.png"
+  },
+  "compliance_settings": {
+    "jurisdiction": "KY",
+    "schedule_3_enabled": true
+  }
+}

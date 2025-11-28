@@ -3,114 +3,79 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sovereign Bridge Setup</title>
+    <title>System Initialization | Cayman Reliance Framework</title>
     <style>
-        body { font-family: 'Helvetica Neue', Arial, sans-serif; background-color: #f0f2f5; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; }
-        .wizard-container { background: white; padding: 40px; border-radius: 8px; box-shadow: 0 4px 20px rgba(0,0,0,0.1); width: 500px; text-align: center; transition: all 0.3s ease; }
-        h1 { color: #333; margin-bottom: 30px; }
-        .step { display: none; }
-        .step.active { display: block; }
-        input, select { width: 100%; padding: 12px; margin: 15px 0; border: 1px solid #ddd; border-radius: 4px; box-sizing: border-box; }
-        button { background-color: #007bff; color: white; border: none; padding: 12px 24px; border-radius: 4px; cursor: pointer; font-size: 16px; width: 100%; }
-        button:hover { background-color: #0056b3; }
-        .logo-preview { max-width: 150px; margin: 20px auto; display: block; }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f4f7f6; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; }
+        .container { background: white; padding: 50px; border-radius: 12px; box-shadow: 0 10px 25px rgba(0,0,0,0.05); width: 550px; text-align: center; }
+        h1 { color: #2c3e50; margin-bottom: 10px; }
+        p { color: #7f8c8d; margin-bottom: 30px; }
+        .form-group { margin-bottom: 20px; text-align: left; }
+        label { display: block; margin-bottom: 8px; font-weight: 600; color: #34495e; }
+        select, input { width: 100%; padding: 12px; border: 1px solid #bdc3c7; border-radius: 6px; font-size: 16px; box-sizing: border-box; }
+        button { background-color: #3498db; color: white; border: none; padding: 14px; border-radius: 6px; cursor: pointer; font-size: 16px; width: 100%; font-weight: 600; transition: background 0.3s; }
+        button:hover { background-color: #2980b9; }
         
-        /* Branding Overrides (Dynamic) */
-        .branded-walkers { border-top: 5px solid #d4af37; }
-        .branded-walkers h1 { color: #003366; }
-        .branded-walkers button { background-color: #003366; }
+        /* Walkers Branding Override */
+        .walkers-theme { border-top: 6px solid #003366; }
+        .walkers-theme h1 { color: #003366; }
+        .walkers-theme button { background-color: #003366; }
+        .walkers-theme button:hover { background-color: #002244; }
+        .success-message { color: #27ae60; font-weight: bold; margin-top: 20px; display: none; }
     </style>
 </head>
 <body>
 
-    <div class="wizard-container" id="wizard">
-        <!-- Screen 1: Entity Type -->
-        <div class="step active" id="step1">
-            <h1>Configure Organization</h1>
-            <p>Select your role in the Sovereign Bridge network.</p>
-            <select id="entityType">
-                <option value="ADMIN">Corporate Administrator</option>
-                <option value="BANK">Bank Node</option>
+    <div class="container" id="mainContainer">
+        <h1>System Initialization</h1>
+        <p>Configure your node for the Cayman Digital Reliance Framework.</p>
+
+        <div class="form-group">
+            <label>Select Entity Role</label>
+            <select id="roleSelect">
+                <option value="CORP_ADMIN">Corporate Administrator</option>
+                <option value="FIN_INST">Financial Institution</option>
                 <option value="REGULATOR">Regulator (CIMA)</option>
             </select>
-            <button onclick="nextStep(2)">Next</button>
         </div>
 
-        <!-- Screen 2: Branding -->
-        <div class="step" id="step2">
-            <h1>Upload Branding</h1>
-            <p>Upload your organization's logo to white-label the interface.</p>
-            <input type="file" id="logoInput" onchange="previewLogo()">
-            <img id="logoPreview" class="logo-preview" src="" style="display:none;">
-            <button onclick="nextStep(3)">Next</button>
+        <div class="form-group">
+            <label>Enterprise License Key</label>
+            <input type="text" id="licenseKey" placeholder="ENTER-LICENSE-KEY">
         </div>
 
-        <!-- Screen 3: Activation -->
-        <div class="step" id="step3">
-            <h1>Activate License</h1>
-            <p>Enter your Sovereign Bridge License Key.</p>
-            <input type="text" id="licenseKey" placeholder="XXXX-XXXX-XXXX-XXXX">
-            <button onclick="activate()">Activate System</button>
-        </div>
+        <button onclick="initializeSystem()">Initialize System</button>
 
-        <!-- Screen 4: Success -->
-        <div class="step" id="step4">
-            <h1 id="welcomeMsg">Setup Complete</h1>
-            <p>The system is now configured for <span id="orgName">[UNCONFIGURED]</span>.</p>
-            <div id="configDetails"></div>
+        <div id="successMsg" class="success-message">
+            System Initialized Successfully.
         </div>
     </div>
 
     <script>
-        function nextStep(step) {
-            document.querySelectorAll('.step').forEach(el => el.classList.remove('active'));
-            document.getElementById('step' + step).classList.add('active');
-        }
-
-        function previewLogo() {
-            const file = document.getElementById('logoInput').files[0];
-            if (file) {
-                const reader = new FileReader();
-                reader.onload = function(e) {
-                    const img = document.getElementById('logoPreview');
-                    img.src = e.target.result;
-                    img.style.display = 'block';
-                }
-                reader.readAsDataURL(file);
-            }
-        }
-
-        function activate() {
+        function initializeSystem() {
             const key = document.getElementById('licenseKey').value;
-            const wizard = document.getElementById('wizard');
-            const welcomeMsg = document.getElementById('welcomeMsg');
-            const orgName = document.getElementById('orgName');
+            const container = document.getElementById('mainContainer');
+            const title = document.querySelector('h1');
+            const successMsg = document.getElementById('successMsg');
 
-            // THE DEMO LOGIC
-            if (key === 'WALKERS-2025') {
-                // Transform to Walkers Branding
-                wizard.classList.add('branded-walkers');
-                welcomeMsg.innerText = "Welcome, Walkers Professional Services";
-                orgName.innerText = "Walkers Fiduciary";
-                orgName.style.fontWeight = "bold";
-                orgName.style.color = "#003366";
-                
-                document.getElementById('configDetails').innerHTML = 
-                    <p style="color: green;">✔ License Verified: ENTERPRISE_ANCHOR</p>
-                    <p>✔ Configuration Loaded: wps-internal.json</p>
-                    <p>✔ Branding Applied: Walkers Corporate Identity</p>
-                ;
+            if (key === 'WALKERS-ENT-2025') {
+                // REBRAND TO WALKERS
+                container.classList.add('walkers-theme');
+                title.innerText = "Walkers Professional Services";
+                successMsg.innerHTML = \
+                    ✔ Production Mode Unlocked<br>
+                    ✔ Tenant: Walkers Fiduciary<br>
+                    ✔ Role: Corporate Administrator (Tier 1)
+                \;
             } else {
-                // Default / Generic
-                welcomeMsg.innerText = "Setup Complete";
-                orgName.innerText = "Corporate Administrator";
-                document.getElementById('configDetails').innerHTML = 
-                    <p style="color: green;">✔ License Verified: STANDARD</p>
-                    <p>✔ Configuration: Default</p>
-                ;
+                // GENERIC INITIALIZATION
+                successMsg.innerHTML = \
+                    ✔ Standard Mode Active<br>
+                    ✔ Tenant: Unconfigured<br>
+                    ✔ Role: \
+                \;
             }
 
-            nextStep(4);
+            successMsg.style.display = 'block';
         }
     </script>
 </body>

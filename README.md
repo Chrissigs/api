@@ -1,22 +1,20 @@
-# The Sovereign Bridge
+# Cayman Digital Reliance Framework
 
-**A Universal AML Automation Protocol for the Cayman Islands.**
+**The Enterprise Standard for Investor Warranty Verification.**
 
 ## Overview
-The Sovereign Bridge is a firm-agnostic, white-label standard for automating AML compliance.
-It allows any licensed entity (Corporate Administrator, Bank, Regulator) to participate in a unified reliance network.
+This repository hosts the source code for the Cayman Digital Reliance Framework, a multi-tenant, firm-agnostic protocol for automating AML compliance and warranty verification.
 
 ## Architecture
-- **White Label**: Fully configurable branding via \config/branding.json\.
-- **Regulation 25 Engine**: Automated checks for Simplified Due Diligence (SDD) eligibility.
-- **Role-Based Access**: Defined roles for AMLCO, MLRO, and Eligible Introducers.
+- **Multi-Tenant**: Supports dynamic configuration via \config/tenant_profile.json\.
+- **Compliance Engine**: Implements Regulation 25 (Schedule 3) checks.
+- **Governance**: Immutable audit logging for AMLCO review.
 
-## Setup
-Run the configuration wizard to initialize your node:
-1. Open \public/setup.html\ in a browser.
-2. Select your entity type.
-3. Upload your logo.
-4. Enter your license key.
+## Initialization
+To configure a new node:
+1. Deploy the codebase.
+2. Access \public/setup.html\.
+3. Enter your Enterprise License Key to inject your tenant profile.
 
 ---
-Copyright (c) 2025 The Sovereign Standard Initiative.
+Copyright (c) 2025 The Reliance Standards Body.

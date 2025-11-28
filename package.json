@@ -1,11 +1,11 @@
 {
-  "name": "sovereign-bridge-protocol",
-  "version": "1.0.0-STANDARD",
-  "description": "The Sovereign Bridge - Universal AML Automation Protocol",
-  "main": "src/compliance/regulation_25.js",
+  "name": "cayman-reliance-standard",
+  "version": "2.0.0-ENTERPRISE",
+  "description": "Cayman Digital Reliance Framework - Multi-Tenant Standard",
+  "main": "src/compliance/regulation_25_check.js",
   "scripts": {
-    "start": "echo 'Starting Sovereign Bridge...' && node src/compliance/regulation_25.js"
+    "start": "node src/compliance/regulation_25_check.js"
   },
-  "author": "The Sovereign Standard Initiative",
-  "license": "SEE LICENSE IN LICENSE"
+  "author": "The Reliance Standards Body",
+  "license": "PROPRIETARY"
 }
